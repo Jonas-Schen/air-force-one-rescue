@@ -1,0 +1,119 @@
+body {
+    overflow: hidden;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-image: url(/assets/textures/opening.png);
+    height: 100vh;
+    background-size: 100% 100%;
+}
+
+canvas {
+    display: block;
+}
+
+#gameboard {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    z-index: 1;
+}
+
+.controls-overlay,
+.settings-overlay,
+.menu-overlay {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.menu {
+    color: #fafafa;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.menu div {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    border: #fafafa solid thin;
+    width: 100%;
+    padding: 30px;
+    cursor: pointer;
+}
+
+.menu div:hover {
+    background-color: rgba(250, 250, 250, 0.1);
+}
+
+.menu div span {
+    padding-right: 8px;
+}
+
+.container-class {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    display: none;
+}
+
+.settings-content,
+.controls-content {
+    color: #fafafa;
+    display: grid;
+    align-items: center;
+    grid-gap: 4px;
+}
+
+.controls-content .row {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: flex-start;
+    grid-template-columns: 40px auto;
+    align-items: center;
+}
+
+.settings-content .row {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: flex-start;
+    grid-template-columns: 150px auto;
+    align-items: center;
+}
+
+.settings-content button,
+.controls-content button {
+    background-color: transparent;
+    color: #fafafa;
+    border: solid 1px #fafafa;
+    padding: 4px 24px;
+    cursor: pointer;
+}
+
+.settings-content select {
+    background-color: transparent;
+    color: #fafafa;
+    padding: 4px 8px;
+}
+
+.settings-content select option {
+    background-color: #fafafa;
+    color: #000;
+}
+
+#settings-sound {
+    cursor: pointer;
+}
