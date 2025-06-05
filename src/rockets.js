@@ -23,7 +23,8 @@ export class RocketsManager {
         this.models = [];
         this.rockets = [];
         this._timer = null;
-        this._initAudio();
+        this._initAudios();
+        this._loadExplosionTexture();
 
         // pré-carrega todos os gltf
         rocketDefs.forEach(def =>
@@ -45,13 +46,65 @@ export class RocketsManager {
         this._scheduleNext();
     }
 
-    _initAudio() {
+    _loadExplosionTexture() {
+        const textureLoader = new THREE.TextureLoader();
+        this.explosionTexture = textureLoader.load(
+            '/assets/textures/explosion.png',
+            undefined,
+            undefined,
+            err => console.error('Error loading explosion texture:', err)
+        );
+    }
+
+    _createExplosionEffect(position) {
+        if (!this.explosionTexture) return;
+
+        // Cria material para o sprite de explosão
+        const spriteMaterial = new THREE.SpriteMaterial({
+            map: this.explosionTexture,
+            transparent: true,
+            opacity: 1,
+            alphaTest: 0.001
+        });
+
+        // Cria o sprite
+        const explosionSprite = new THREE.Sprite(spriteMaterial);
+        explosionSprite.scale.set(2, 2, 1); // Ajuste o tamanho conforme necessário
+        explosionSprite.position.copy(position);
+
+        // Adiciona à cena
+        this.scene.add(explosionSprite);
+
+        // Remove após 1 segundo com efeito de fade
+        let opacity = 1;
+        const fadeInterval = setInterval(() => {
+            opacity -= 0.05; // Reduz a opacidade gradualmente
+            spriteMaterial.opacity = opacity;
+
+            if (opacity <= 0) {
+                this.scene.remove(explosionSprite);
+                spriteMaterial.dispose();
+                clearInterval(fadeInterval);
+            }
+        }, 50); // Atualiza a cada 50ms para um fade suave
+
+        // Garantia de remoção após 1 segundo (caso o fade não funcione)
+        setTimeout(() => {
+            if (explosionSprite.parent) {
+                this.scene.remove(explosionSprite);
+                spriteMaterial.dispose();
+            }
+        }, 1000);
+    }
+
+    _initAudios() {
         if ((localStorage.getItem('sound') ?? 'ON') === 'OFF') return;
 
         this.listener = new AudioListener();
         this.camera.add(this.listener);
 
         this.rocketSound = new Audio(this.listener);
+        this.explosionSound = new Audio(this.listener);
 
         const rocketSoundLoader = new AudioLoader();
         rocketSoundLoader.load(
@@ -63,6 +116,18 @@ export class RocketsManager {
             },
             undefined,
             err => console.error('Error loading rocket sound:', err)
+        );
+
+        const explosionSoundLoader = new AudioLoader();
+        explosionSoundLoader.load(
+            '/assets/sounds/explosion.ogg',
+            buffer => {
+                this.explosionSound.setBuffer(buffer);
+                this.explosionSound.setLoop(false);
+                this.explosionSound.setVolume(0.5);
+            },
+            undefined,
+            err => console.error('Error loading explosion sound:', err)
         );
     }
 
@@ -92,8 +157,8 @@ export class RocketsManager {
         const H = 2 * this.camera.position.z * Math.tan((this.camera.fov/2)*(Math.PI/180));
         const halfH = H/2;
         const viewX = halfH * this.camera.aspect;
-        const topY = halfH - 0.5;
-        const botY = -halfH + 3;
+        const topY = halfH - 3;
+        const botY = -halfH + 1;
 
         // pos Y aleatória e X fora da tela
         rocket.position.y = THREE.MathUtils.randFloat(botY, topY);
@@ -138,8 +203,27 @@ export class RocketsManager {
             const boxR = new THREE.Box3().setFromObject(r);
             const boxP = new THREE.Box3().setFromObject(this.player.group);
             if (boxR.intersectsBox(boxP)) {
-                this.gameState.gameOver();
-                return;
+                // Cria efeito de explosão na posição do míssil
+                this._createExplosionEffect(r.position.clone());
+
+                if (this.explosionSound) {
+                    if (this.explosionSound.isPlaying) {
+                        this.explosionSound.stop();
+                    }
+                    this.explosionSound.play();
+                }
+
+                // Remove o míssil da cena e do array quando há colisão
+                this.scene.remove(r);
+                this.rockets.splice(i, 1);
+                // Para o som se não há mais mísseis
+                if (this.rocketSound && this.rockets.length === 0) {
+                    this.rocketSound.stop();
+                }
+
+                this.gameState.playerHit();
+
+                continue;
             }
 
             // remoção fora da tela

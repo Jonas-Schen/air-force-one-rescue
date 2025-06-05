@@ -1,4 +1,3 @@
-// game.js
 import * as THREE from 'three';
 import { Player } from './player.js';
 import { EnemiesManager } from './enemies.js';
@@ -34,9 +33,19 @@ export class Game {
         this.minWorldSpeed = 0.02;
         this.maxWorldSpeed = 0.5;
 
+        // Sistema de vidas
+        this.playerLives = 4;
+        this.invulnerabilityTime = 2000; // 2 segundos de invulnerabilidade
+        this.isInvulnerable = false;
+        this.lastHitTime = 0;
+
         this.gameState = {
             speed: 0.02,
             score: 0,
+            lives: this.playerLives,
+            playerHit: () => {
+                this._handlePlayerHit();
+            },
             gameOver: () => {
                 if (this.planeSound) {
                     this.planeSound.stop();
@@ -60,6 +69,51 @@ export class Game {
         this.enemiesManager = new EnemiesManager(this.scene, this.camera, this.player, this.gameState);
     }
 
+    _handlePlayerHit() {
+        // Verifica se o jogador está invulnerável
+        if (this.isInvulnerable) {
+            return;
+        }
+
+        // Reduz uma vida
+        this.playerLives--;
+        this.gameState.lives = this.playerLives;
+
+        console.log(`Jogador atingido! Vidas restantes: ${this.playerLives}`);
+
+        // Ativa invulnerabilidade
+        this.isInvulnerable = true;
+        this.lastHitTime = Date.now();
+
+        // Efeito visual de invulnerabilidade (piscar o jogador)
+        this._startInvulnerabilityEffect();
+
+        // Verifica se o jogador morreu
+        if (this.playerLives <= 0) {
+            this.gameState.gameOver();
+        }
+    }
+
+    _startInvulnerabilityEffect() {
+        let blinkCount = 0;
+        const maxBlinks = 10; // Número de piscadas
+        const blinkInterval = this.invulnerabilityTime / maxBlinks;
+
+        const blinkTimer = setInterval(() => {
+            if (blinkCount >= maxBlinks) {
+                // Para o efeito e remove invulnerabilidade
+                this.isInvulnerable = false;
+                this.player.group.visible = true;
+                clearInterval(blinkTimer);
+                return;
+            }
+
+            // Alterna visibilidade do jogador
+            this.player.group.visible = !this.player.group.visible;
+            blinkCount++;
+        }, blinkInterval);
+    }
+
     start() {
         this.gameStarted = false;       // só vai virar true quando o player terminar de carregar
         this.clock = new THREE.Clock();
@@ -77,9 +131,19 @@ export class Game {
         // reset player
         this.player.group.position.set(0, -2.5, 0);
         this.player.currentPositionY = -2.5;
+        this.player.group.visible = true; // Garante que o jogador esteja visível
+
+        // reset vidas e estado
+        this.playerLives = 4;
+        this.isInvulnerable = false;
+        this.lastHitTime = 0;
 
         // reset flags e velocidades
-        Object.assign(this.gameState, { speed: 0.02, score: 0 });
+        Object.assign(this.gameState, {
+            speed: 0.02,
+            score: 0,
+            lives: this.playerLives
+        });
         this.moveLeft = this.moveRight = this.moveUp = this.moveDown = false;
         this.increaseSpeed = this.decreaseSpeed = false;
         this.playerSpeed = 0.1;
@@ -238,7 +302,7 @@ export class Game {
         this.enemiesManager.update(this.worldSpeed);
 
         // atualiza UI
-        updateScoreUI(this.gameState.score, this.worldSpeed, this.isPaused);
+        updateScoreUI(this.gameState.score, this.worldSpeed, this.playerLives);
 
         this.renderer.render(this.scene, this.camera);
     }
