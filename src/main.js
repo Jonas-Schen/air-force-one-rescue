@@ -10,6 +10,11 @@ export class App {
     }
 
     start() {
+        this.game = new Game();
+        this.game.start();
+
+        return;
+
         // 1) Garante que o <div id="gameboard"> esteja oculto até a abertura terminar
         if (this.gameboard) {
             this.gameboard.style.display = 'none';

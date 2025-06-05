@@ -33,11 +33,14 @@ export class Game {
         this.minWorldSpeed = 0.02;
         this.maxWorldSpeed = 0.5;
 
-        // Sistema de vidas
-        this.playerLives = 4;
+        // Sistema de vidas e chamas - ALTERADO PARA 5 VIDAS
+        this.initialLives = 5;
+        this.playerLives = this.initialLives;
         this.invulnerabilityTime = 2000; // 2 segundos de invulnerabilidade
         this.isInvulnerable = false;
         this.lastHitTime = 0;
+        this.engineFlames = []; // Array para armazenar as chamas das turbinas
+        this.flameTexture = null;
 
         this.gameState = {
             speed: 0.02,
@@ -60,6 +63,7 @@ export class Game {
         this._initCamera();
         this._initRenderer();
         this._initLights();
+        this._loadFlameTexture();
         this._initPlayer();
         this._bindEvents();
         this._animate();
@@ -67,6 +71,86 @@ export class Game {
 
         this.rocketsManager = new RocketsManager(this.scene, this.camera, this.player, this.gameState);
         this.enemiesManager = new EnemiesManager(this.scene, this.camera, this.player, this.gameState);
+    }
+
+    _loadFlameTexture() {
+        const textureLoader = new THREE.TextureLoader();
+        this.flameTexture = textureLoader.load(
+            '/assets/textures/flame.png',
+            undefined,
+            undefined,
+            err => console.error('Erro ao carregar textura de chama:', err)
+        );
+    }
+
+    _createEngineFlame(engineIndex) {
+        if (!this.flameTexture || !this.player) return;
+
+        // Posições aproximadas das 4 turbinas (ajustar conforme necessário)
+        const enginePositions = [
+            { x: -0.95, y: -1.9, z: 0.3 }, // Turbina esquerda externa
+            { x: -0.55, y: -1.9, z: -0.1 }, // Turbina esquerda interna
+            { x: 0.55, y: -1.9, z: -0.1 }, // Turbina direita interna
+            { x: 0.95, y: -1.9, z: 0.3 } // Turbina direita externa
+        ];
+
+        if (engineIndex >= enginePositions.length) return;
+
+        // Cria material para o sprite de chama
+        const spriteMaterial = new THREE.SpriteMaterial({
+            map: this.flameTexture,
+            transparent: true,
+            opacity: 0.8,
+            alphaTest: 0.001,
+            blending: THREE.AdditiveBlending // Efeito de fogo mais realista
+        });
+
+        // Cria o sprite
+        const flameSprite = new THREE.Sprite(spriteMaterial);
+        flameSprite.scale.set(0.3, 0.5, 1); // Tamanho da chama
+
+        // Posiciona a chama na turbina correspondente
+        const pos = enginePositions[engineIndex];
+        flameSprite.position.set(pos.x, pos.y, pos.z);
+
+        // Adiciona a chama ao grupo do jogador
+        this.player.group.add(flameSprite);
+
+        // Armazena a chama para animação
+        this.engineFlames[engineIndex] = {
+            sprite: flameSprite,
+            material: spriteMaterial,
+            baseScale: { x: 0.3, y: 0.5 },
+            active: true
+        };
+    }
+
+    _updateEngineFlames() {
+        // Anima as chamas das turbinas
+        this.engineFlames.forEach((flame, index) => {
+            if (flame && flame.active) {
+                // Efeito de tremeluzir/piscar
+                const time = Date.now() * 0.01;
+                const flicker = 0.8 + Math.sin(time + index) * 0.2;
+
+                flame.sprite.scale.x = flame.baseScale.x * flicker;
+                flame.sprite.scale.y = flame.baseScale.y * (0.9 + Math.sin(time * 2 + index) * 0.1);
+
+                // Varia a opacidade
+                flame.material.opacity = 0.6 + Math.sin(time * 3 + index) * 0.2;
+            }
+        });
+    }
+
+    _clearEngineFlames() {
+        // Remove todas as chamas das turbinas
+        this.engineFlames.forEach(flame => {
+            if (flame && flame.sprite && flame.sprite.parent) {
+                flame.sprite.parent.remove(flame.sprite);
+                flame.material.dispose();
+            }
+        });
+        this.engineFlames = [];
     }
 
     _handlePlayerHit() {
@@ -79,7 +163,11 @@ export class Game {
         this.playerLives--;
         this.gameState.lives = this.playerLives;
 
-        console.log(`Jogador atingido! Vidas restantes: ${this.playerLives}`);
+        // Adiciona fogo na turbina correspondente (5-1=4, 4-1=3, etc.)
+        const engineToIgnite = 5 - this.playerLives - 1;
+        if (engineToIgnite >= 0 && engineToIgnite < 4) {
+            this._createEngineFlame(engineToIgnite);
+        }
 
         // Ativa invulnerabilidade
         this.isInvulnerable = true;
@@ -128,13 +216,15 @@ export class Game {
             this.planeSound.stop();
         }
 
+        // Limpa as chamas das turbinas
+        this._clearEngineFlames();
+
         // reset player
         this.player.group.position.set(0, -2.5, 0);
         this.player.currentPositionY = -2.5;
         this.player.group.visible = true; // Garante que o jogador esteja visível
 
-        // reset vidas e estado
-        this.playerLives = 4;
+        this.playerLives = this.initialLives;
         this.isInvulnerable = false;
         this.lastHitTime = 0;
 
@@ -281,6 +371,9 @@ export class Game {
         }
 
         const deltaTime = this.clock.getDelta();
+
+        // Atualiza animação das chamas
+        this._updateEngineFlames();
 
         // pontuação baseada em distância percorrida
         this.gameState.score += this.worldSpeed * deltaTime * 100;
