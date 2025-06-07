@@ -9,13 +9,29 @@
     </head>
     <body>
         <div id="gameboard" style="display: none">
-            <span id="score"></span>
+            <span id="distance"></span>
             <br>
             <span id="speed"></span>
             <br>
+            <div id="paused"></div>
             <span id="lives"></span>
-            <br>
-            <span id="paused"></span>
+            <div class="fuel‐gauge" id="fuelGauge">
+                <div class="bars-container" id="barsContainer">
+                    <!-- 10 barras (vazias por padrão) -->
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                </div>
+                <!-- Ponteiro que aponta o nível exato -->
+                <div class="fuel‐ticker" id="fuelTicker"></div>
+            </div>
         </div>
 
         <div id="opening-container" class="container-class"></div>
@@ -189,5 +205,8 @@
         </div>
 
         <script type="module" src="src/scripts.js"></script>
+        <script>
+
+        </script>
     </body>
 </html>

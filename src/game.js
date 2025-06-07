@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Player } from './player.js';
 import { EnemiesManager } from './enemies.js';
 import { RocketsManager } from './rockets.js';
+import { TankerManager } from './tanker.js';
 import {updateScoreUI, showGameOver, updatePauseUI} from './ui.js';
 import {AudioListener, AudioLoader, Audio} from 'three';
 
@@ -33,7 +34,7 @@ export class Game {
         this.minWorldSpeed = 0.02;
         this.maxWorldSpeed = 0.5;
 
-        // Sistema de vidas e chamas - ALTERADO PARA 5 VIDAS
+        // Sistema de vidas e chamas
         this.initialLives = 5;
         this.playerLives = this.initialLives;
         this.invulnerabilityTime = 2000; // 2 segundos de invulnerabilidade
@@ -42,10 +43,15 @@ export class Game {
         this.engineFlames = []; // Array para armazenar as chamas das turbinas
         this.flameTexture = null;
 
+        this.fuelConsumptionRate = 12.6;
+        this.lastFuelCheck = 0;
+        this.initialFuelLevel = 100;
+
         this.gameState = {
             speed: 0.02,
-            score: 0,
+            distance: 0,
             lives: this.playerLives,
+            fuelLevel: this.initialFuelLevel,
             playerHit: () => {
                 this._handlePlayerHit();
             },
@@ -54,7 +60,7 @@ export class Game {
                     this.planeSound.stop();
                 }
                 this.rocketsManager.reset();
-                showGameOver(this.gameState.score, this.resetGame.bind(this));
+                showGameOver(this.gameState.distance, this.resetGame.bind(this));
             }
         };
 
@@ -71,6 +77,28 @@ export class Game {
 
         this.rocketsManager = new RocketsManager(this.scene, this.camera, this.player, this.gameState);
         this.enemiesManager = new EnemiesManager(this.scene, this.camera, this.player, this.gameState);
+        this.tankerManager = new TankerManager(this.scene, this.player, this.gameState);
+    }
+
+    _updateFuelConsumption() {
+        // Durante o reabastecimento, não consome combustível
+        if (this.tankerManager && this.tankerManager.inProgress) {
+            return;
+        }
+
+        // Calcula quantas unidades de combustível devem ter sido consumidas baseado na distância
+        const fuelUnitsConsumed = Math.floor(this.gameState.distance / this.fuelConsumptionRate);
+
+        // Se uma nova unidade deve ser consumida
+        if (fuelUnitsConsumed > this.lastFuelCheck) {
+            this.gameState.fuelLevel = Math.max(0, 100 - fuelUnitsConsumed);
+            this.lastFuelCheck = fuelUnitsConsumed;
+
+            // Verifica se o combustível acabou
+            if (this.gameState.fuelLevel <= 0) {
+                this.gameState.gameOver();
+            }
+        }
     }
 
     _loadFlameTexture() {
@@ -79,7 +107,7 @@ export class Game {
             '/assets/textures/flame.png',
             undefined,
             undefined,
-            err => console.error('Erro ao carregar textura de chama:', err)
+            err => console.error('Error loading flame texture:', err)
         );
     }
 
@@ -163,8 +191,7 @@ export class Game {
         this.playerLives--;
         this.gameState.lives = this.playerLives;
 
-        // Adiciona fogo na turbina correspondente (5-1=4, 4-1=3, etc.)
-        const engineToIgnite = 5 - this.playerLives - 1;
+        const engineToIgnite = this.initialLives - this.playerLives - 1;
         if (engineToIgnite >= 0 && engineToIgnite < 4) {
             this._createEngineFlame(engineToIgnite);
         }
@@ -193,6 +220,7 @@ export class Game {
                 this.isInvulnerable = false;
                 this.player.group.visible = true;
                 clearInterval(blinkTimer);
+
                 return;
             }
 
@@ -211,6 +239,7 @@ export class Game {
         this._clearRocketTimer();
         this.rocketsManager.reset();
         this.enemiesManager.reset();
+        this.tankerManager.reset();
 
         if (this.planeSound) {
             this.planeSound.stop();
@@ -218,6 +247,12 @@ export class Game {
 
         // Limpa as chamas das turbinas
         this._clearEngineFlames();
+
+        // Desativa sequência de reabastecimento se estiver ativa
+        if (this.isRefuelSequenceActive) {
+            this.refuelPlane.deactivate();
+            this.isRefuelSequenceActive = false;
+        }
 
         // reset player
         this.player.group.position.set(0, -2.5, 0);
@@ -228,11 +263,15 @@ export class Game {
         this.isInvulnerable = false;
         this.lastHitTime = 0;
 
+        // Reset do sistema de combustível
+        this.lastFuelCheck = 0;
+
         // reset flags e velocidades
         Object.assign(this.gameState, {
             speed: 0.02,
-            score: 0,
-            lives: this.playerLives
+            distance: 0,
+            lives: this.playerLives,
+            fuelLevel: this.initialFuelLevel,
         });
         this.moveLeft = this.moveRight = this.moveUp = this.moveDown = false;
         this.increaseSpeed = this.decreaseSpeed = false;
@@ -249,7 +288,7 @@ export class Game {
         loader.load('/assets/textures/sky/sky_full.png',
             tex => { this.scene.background = tex; },
             undefined,
-            err => console.error('Erro ao carregar sky texture:', err)
+            err => console.error('Error loading sky texture:', err)
         );
     }
 
@@ -354,6 +393,8 @@ export class Game {
 
         updatePauseUI(this.isPaused);
         this.rocketsManager.isPaused = this.isPaused;
+        this.tankerManager.isPaused = this.isPaused;
+
         if (this.isPaused) {
             if (this.planeSound && this.planeSound.isPlaying) {
                 this.planeSound.stop();
@@ -376,7 +417,13 @@ export class Game {
         this._updateEngineFlames();
 
         // pontuação baseada em distância percorrida
-        this.gameState.score += this.worldSpeed * deltaTime * 100;
+        this.gameState.distance += this.worldSpeed * deltaTime * 100;
+
+        // Atualiza consumo de combustível baseado na distância
+        this._updateFuelConsumption();
+
+        // Atualiza sistema de reabastecimento
+        this.tankerManager.update(deltaTime);
 
         // mover jogador
         const dir = this.moveLeft ? 'left'
@@ -395,7 +442,7 @@ export class Game {
         this.enemiesManager.update(this.worldSpeed);
 
         // atualiza UI
-        updateScoreUI(this.gameState.score, this.worldSpeed, this.playerLives);
+        updateScoreUI(this.gameState.distance, this.worldSpeed, this.playerLives, this.gameState.fuelLevel);
 
         this.renderer.render(this.scene, this.camera);
     }
@@ -424,12 +471,15 @@ export class Game {
     _getFrustumHeight() {
         return 2 * this.camera.position.z * Math.tan( (this.camera.fov/2) * (Math.PI/180) );
     }
+
     _getUpperY() {
         return this._getFrustumHeight()/2 - 0.5;
     }
+
     _getLowerY() {
         return -this._getFrustumHeight()/2 + 3;
     }
+
     _getViewLimitX() {
         return this._getUpperY() * this.camera.aspect;
     }
