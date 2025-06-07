@@ -77,7 +77,7 @@ export class Game {
 
         this.rocketsManager = new RocketsManager(this.scene, this.camera, this.player, this.gameState);
         this.enemiesManager = new EnemiesManager(this.scene, this.camera, this.player, this.gameState);
-        this.tankerManager = new TankerManager(this.scene, this.player, this.gameState);
+        this.tankerManager = new TankerManager(this.scene, this.camera, this.player, this.gameState);
     }
 
     _updateFuelConsumption() {

@@ -1,8 +1,10 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {AudioListener, AudioLoader, Audio} from 'three';
 
 export class TankerManager {
-    constructor(scene, player, gameState) {
+    constructor(scene, camera, player, gameState) {
         this.scene = scene;
+        this.camera = camera;
         this.player = player;
         this.gameState = gameState;
         this.loader = new GLTFLoader();
@@ -46,6 +48,42 @@ export class TankerManager {
         this.startRotation = { x: -2, y: -Math.PI, z: 0 };
         this.targetRotation = { x: 0, y: -Math.PI / 2, z: 0 };
         this.departRotation = { x: 2, y: -Math.PI, z: 0 };
+
+        this._initAudios();
+    }
+
+    _initAudios() {
+        if ((localStorage.getItem('sound') ?? 'ON') === 'OFF') return;
+
+        this.listener = new AudioListener();
+        this.camera.add(this.listener);
+
+        this.fillingSound = new Audio(this.listener);
+        this.tankerSound = new Audio(this.listener);
+
+        const fillingSoundLoader = new AudioLoader();
+        fillingSoundLoader.load(
+            '/assets/sounds/filling.ogg',
+            buffer => {
+                this.fillingSound.setBuffer(buffer);
+                this.fillingSound.setLoop(false);
+                this.fillingSound.setVolume(0.3);
+            },
+            undefined,
+            err => console.error('Error loading filling sound:', err)
+        );
+
+        const tankerSoundLoader = new AudioLoader();
+        tankerSoundLoader.load(
+            '/assets/sounds/tanker.ogg',
+            buffer => {
+                this.tankerSound.setBuffer(buffer);
+                this.tankerSound.setLoop(false);
+                this.tankerSound.setVolume(1);
+            },
+            undefined,
+            err => console.error('Error loading tanker sound:', err)
+        );
     }
 
     /**
@@ -159,6 +197,10 @@ export class TankerManager {
      */
     _startTankerApproach() {
         if (!this.tankerPlaneModel || this.isRefuelingActive) return;
+
+        if (this.tankerSound) {
+            this.tankerSound.play();
+        }
 
         this.approachElapsedTime = 0;
         this.positionedElapsedTime = 0;
@@ -279,8 +321,22 @@ export class TankerManager {
         const isInPosition = this._isPlayerInRefuelingPosition(playerPos, refuelingPos);
 
         if (isInPosition && distance <= this.refuelingConnectionDistance) {
+            this._playFillingSound()
+
             this.tankerState = 'REFUELING';
             this.refuelingInProgress = true;
+        }
+    }
+
+    _playFillingSound() {
+        if (this.fillingSound && !this.fillingSound.isPlaying) {
+            this.fillingSound.play();
+        }
+    }
+
+    _stopFillingSound() {
+        if (this.fillingSound && this.fillingSound.isPlaying) {
+            this.fillingSound.stop();
         }
     }
 
@@ -315,6 +371,7 @@ export class TankerManager {
         } else {
             this.tankerState = 'POSITIONED';
             this.refuelingInProgress = false;
+            this._stopFillingSound();
         }
     }
 
@@ -340,8 +397,16 @@ export class TankerManager {
      * Inicia a saída do tanker (com motivo)
      */
     _startTankerDeparture() {
+        if (this.tankerSound) {
+            if (this.tankerSound.isPlaying) {
+                this.tankerSound.stop();
+            }
+            this.tankerSound.play();
+        }
+
         this.tankerState = 'DEPARTING';
         this.refuelingInProgress = false;
+        this._stopFillingSound();
         this.departElapsedTime = 0;
     }
 
@@ -432,6 +497,7 @@ export class TankerManager {
 
         this.isRefuelingActive = false;
         this.refuelingInProgress = false;
+        this._stopFillingSound();
         this.tankerState = 'IDLE';
 
         this._startCooldown();
@@ -450,6 +516,7 @@ export class TankerManager {
 
         this.isRefuelingActive = false;
         this.refuelingInProgress = false;
+        this._stopFillingSound();
         this.tankerState = 'IDLE';
 
         this.approachElapsedTime = 0;
