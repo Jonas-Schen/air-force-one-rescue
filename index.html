@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Air Force One Rescue</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=info,joystick,plane_contrails,settings"/>
+      <script type="module" crossorigin src="/air-force-one-rescue/assets/index-C_YBgvWt.js"></script>
+      <link rel="stylesheet" crossorigin href="/air-force-one-rescue/assets/index-DzcRy3cL.css">
+    </head>
+    <body>
+        <div id="gameboard" style="display: none">
+            <span id="distance"></span>
+            <br>
+            <span id="speed"></span>
+            <br>
+            <div id="paused"></div>
+            <span id="lives"></span>
+            <div class="fuel‐gauge" id="fuelGauge">
+                <div class="bars-container" id="barsContainer">
+                    <!-- 10 barras (vazias por padrão) -->
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                    <div class="fuel-bar"></div>
+                </div>
+                <!-- Ponteiro que aponta o nível exato -->
+                <div class="fuel‐ticker" id="fuelTicker"></div>
+            </div>
+        </div>
+
+        <div id="opening-container" class="container-class"></div>
+        <div id="game-container" class="container-class"></div>
+
+        <div id="controls-container" class="container-class">
+            <div class="controls-overlay">
+                <div class="controls-content">
+                    <div class="row">
+                        <div>
+                            [ ↑ ]
+                        </div>
+                        <div>
+                            <t>movePlaneDown</t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            [ ↓ ]
+                        </div>
+                        <div>
+                            <t>movePlaneUp</t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            [←]
+                        </div>
+                        <div>
+                            <t>movePlaneLeft</t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            [→]
+                        </div>
+                        <div>
+                            <t>movePlaneRight</t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            [ A ]
+                        </div>
+                        <div>
+                            <t>increasesSpeed</t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            [ Z ]
+                        </div>
+                        <div>
+                            <t>decreasesSpeed</t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            [ P ]
+                        </div>
+                        <div>
+                            <t>pauseUnpause</t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <br><br>
+                            <button id="btn-close-controls"><t>OK</t></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-container" class="container-class">
+            <div class="settings-overlay">
+                <div class="settings-content">
+                    <div class="row">
+                        <div>
+                            <t>SOUNDS</t>
+                        </div>
+                        <div id="settings-sound">
+                            OFF
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <label for="settings-lang">
+                                <t>LANGUAGE</t>
+                            </label>
+                        </div>
+                        <div>
+                            <select id="settings-lang">
+                                <option value="ar">عربي</option>
+                                <option value="bn">বাংলা</option>
+                                <option value="cs">Čeština</option>
+                                <option value="sr">Српски</option>
+                                <option value="da">Dansk</option>
+                                <option value="de">Deutsch</option>
+                                <option value="et">Eesti</option>
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                                <option value="eo">Esperanto</option>
+                                <option value="fil">Filipino</option>
+                                <option value="fr">Français</option>
+                                <option value="ka">ქართული</option>
+                                <option value="el">ελληνικά</option>
+                                <option value="he">עִברִית</option>
+                                <option value="hi">हिन्दी</option>
+                                <option value="hr">Hrvatski</option>
+                                <option value="id">Indonesia</option>
+                                <option value="it">Italiano</option>
+                                <option value="ja">日本語</option>
+                                <option value="ko">한국인</option>
+                                <option value="hu">Magyar</option>
+                                <option value="is">Íslenska</option>
+                                <option value="lt">Lietuvių</option>
+                                <option value="mk">македонски</option>
+                                <option value="nl">Nederlands</option>
+                                <option value="nb">Norsk</option>
+                                <option value="uz">O'zbek</option>
+                                <option value="pa_arab">پنجابی</option>
+                                <option value="pa_guru">ਪੰਜਾਬੀ</option>
+                                <option value="pl">Polski</option>
+                                <option value="pt">Português</option>
+                                <option value="pt_br">Português brasileiro</option>
+                                <option value="ru">Русский</option>
+                                <option value="ro">Română</option>
+                                <option value="sk">Slovák</option>
+                                <option value="sl">Slovenščina</option>
+                                <option value="fi">Suomi</option>
+                                <option value="tr">Türkçe</option>
+                                <option value="ur">اردو</option>
+                                <option value="uk">Українська</option>
+                                <option value="zh">繁體中文</option>
+                                <option value="zh_cn">简体中文</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <br><br>
+                            <button id="btn-close-settings"><t>OK</t></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="credits-container" class="container-class"></div>
+
+        <div class="menu-overlay">
+            <div class="menu">
+                <div id="btn-start">
+                    <span class="material-symbols-outlined">plane_contrails</span>
+                    <t>START</t>
+                </div>
+                <div id="btn-controls">
+                    <span class="material-symbols-outlined">joystick</span>
+                    <t>CONTROLS</t>
+                </div>
+                <div id="btn-settings">
+                    <span class="material-symbols-outlined">settings</span>
+                    <t>SETTINGS</t>
+                </div>
+                <div id="btn-credits">
+                    <span class="material-symbols-outlined">info</span>
+                    <t>ABOUT</t>
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+        </script>
+    </body>
+</html>
