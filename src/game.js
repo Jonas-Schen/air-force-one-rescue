@@ -19,7 +19,7 @@ export class Game {
         this.gameStarted = false;
         this.isPaused = false;
 
-        // flags de controle
+        //> flags de controle
         this.moveLeft = false;
         this.moveRight = false;
         this.moveUp = false;
@@ -34,13 +34,13 @@ export class Game {
         this.minWorldSpeed = 0.02;
         this.maxWorldSpeed = 0.5;
 
-        // Sistema de vidas e chamas
+        //> Life and flame system
         this.initialLives = 5;
         this.playerLives = this.initialLives;
-        this.invulnerabilityTime = 2000; // 2 segundos de invulnerabilidade
+        this.invulnerabilityTime = 2000; //> 2 seconds of invulnerability
         this.isInvulnerable = false;
         this.lastHitTime = 0;
-        this.engineFlames = []; // Array para armazenar as chamas das turbinas
+        this.engineFlames = []; //> Array for storing turbine flames
         this.flameTexture = null;
 
         this.fuelConsumptionRate = 12.6;
@@ -81,20 +81,20 @@ export class Game {
     }
 
     _updateFuelConsumption() {
-        // Durante o reabastecimento, não consome combustível
+        //> During refueling, it does not consume fuel
         if (this.tankerManager && this.tankerManager.inProgress) {
             return;
         }
 
-        // Calcula quantas unidades de combustível devem ter sido consumidas baseado na distância
+        //> Calculates how many units of fuel should have been consumed based on the distance
         const fuelUnitsConsumed = Math.floor(this.gameState.distance / this.fuelConsumptionRate);
 
-        // Se uma nova unidade deve ser consumida
+        //> Tests whether a new unit should be consumed
         if (fuelUnitsConsumed > this.lastFuelCheck) {
             this.gameState.fuelLevel = Math.max(0, 100 - fuelUnitsConsumed);
             this.lastFuelCheck = fuelUnitsConsumed;
 
-            // Verifica se o combustível acabou
+            //> Check if the fuel is out
             if (this.gameState.fuelLevel <= 0) {
                 this.gameState.gameOver();
             }
@@ -114,37 +114,37 @@ export class Game {
     _createEngineFlame(engineIndex) {
         if (!this.flameTexture || !this.player) return;
 
-        // Posições aproximadas das 4 turbinas (ajustar conforme necessário)
+        //> Approximate positions of the 4 turbines (adjust as needed)
         const enginePositions = [
-            { x: -0.95, y: -1.9, z: 0.3 }, // Turbina esquerda externa
-            { x: -0.55, y: -1.9, z: -0.1 }, // Turbina esquerda interna
-            { x: 0.55, y: -1.9, z: -0.1 }, // Turbina direita interna
-            { x: 0.95, y: -1.9, z: 0.3 } // Turbina direita externa
+            { x: -0.95, y: -1.9, z: 0.3 }, //> External left turbine
+            { x: -0.55, y: -1.9, z: -0.1 }, //> Internal left turbine
+            { x: 0.55, y: -1.9, z: -0.1 }, //> Internal right turbine
+            { x: 0.95, y: -1.9, z: 0.3 } //> External right turbine
         ];
 
         if (engineIndex >= enginePositions.length) return;
 
-        // Cria material para o sprite de chama
+        //> Creates material for the flame sprite
         const spriteMaterial = new THREE.SpriteMaterial({
             map: this.flameTexture,
             transparent: true,
             opacity: 0.8,
             alphaTest: 0.001,
-            blending: THREE.AdditiveBlending // Efeito de fogo mais realista
+            blending: THREE.AdditiveBlending //> More realistic flame effect
         });
 
-        // Cria o sprite
+        //> Create sprite
         const flameSprite = new THREE.Sprite(spriteMaterial);
-        flameSprite.scale.set(0.3, 0.5, 1); // Tamanho da chama
+        flameSprite.scale.set(0.3, 0.5, 1); //> Flame size
 
-        // Posiciona a chama na turbina correspondente
+        //> Positions the flame in the corresponding turbine
         const pos = enginePositions[engineIndex];
         flameSprite.position.set(pos.x, pos.y, pos.z);
 
-        // Adiciona a chama ao grupo do jogador
+        //> Adds the flame to the player's party
         this.player.group.add(flameSprite);
 
-        // Armazena a chama para animação
+        //> Stores the flame for animation
         this.engineFlames[engineIndex] = {
             sprite: flameSprite,
             material: spriteMaterial,
@@ -154,24 +154,24 @@ export class Game {
     }
 
     _updateEngineFlames() {
-        // Anima as chamas das turbinas
+        //> Animates the flames of the turbines
         this.engineFlames.forEach((flame, index) => {
             if (flame && flame.active) {
-                // Efeito de tremeluzir/piscar
+                //> Flashing effect
                 const time = Date.now() * 0.01;
                 const flicker = 0.8 + Math.sin(time + index) * 0.2;
 
                 flame.sprite.scale.x = flame.baseScale.x * flicker;
                 flame.sprite.scale.y = flame.baseScale.y * (0.9 + Math.sin(time * 2 + index) * 0.1);
 
-                // Varia a opacidade
+                //> Varying the opacity
                 flame.material.opacity = 0.6 + Math.sin(time * 3 + index) * 0.2;
             }
         });
     }
 
     _clearEngineFlames() {
-        // Remove todas as chamas das turbinas
+        //> Removes all flames from turbines
         this.engineFlames.forEach(flame => {
             if (flame && flame.sprite && flame.sprite.parent) {
                 flame.sprite.parent.remove(flame.sprite);
@@ -182,12 +182,12 @@ export class Game {
     }
 
     _handlePlayerHit() {
-        // Verifica se o jogador está invulnerável
+        //> Checks if the player is invulnerable
         if (this.isInvulnerable) {
             return;
         }
 
-        // Reduz uma vida
+        //> Decrease a life
         this.playerLives--;
         this.gameState.lives = this.playerLives;
 
@@ -196,14 +196,14 @@ export class Game {
             this._createEngineFlame(engineToIgnite);
         }
 
-        // Ativa invulnerabilidade
+        //> Activates invulnerability
         this.isInvulnerable = true;
         this.lastHitTime = Date.now();
 
-        // Efeito visual de invulnerabilidade (piscar o jogador)
+        //> Invulnerability visual effect (blinking the player)
         this._startInvulnerabilityEffect();
 
-        // Verifica se o jogador morreu
+        //> Checks if the player died
         if (this.playerLives <= 0) {
             this.gameState.gameOver();
         }
@@ -211,12 +211,12 @@ export class Game {
 
     _startInvulnerabilityEffect() {
         let blinkCount = 0;
-        const maxBlinks = 10; // Número de piscadas
+        const maxBlinks = 10; //> Number of blinks
         const blinkInterval = this.invulnerabilityTime / maxBlinks;
 
         const blinkTimer = setInterval(() => {
             if (blinkCount >= maxBlinks) {
-                // Para o efeito e remove invulnerabilidade
+                //> For the purpose and removes invulnerability
                 this.isInvulnerable = false;
                 this.player.group.visible = true;
                 clearInterval(blinkTimer);
@@ -224,14 +224,14 @@ export class Game {
                 return;
             }
 
-            // Alterna visibilidade do jogador
+            //> Toggle player visibility
             this.player.group.visible = !this.player.group.visible;
             blinkCount++;
         }, blinkInterval);
     }
 
     start() {
-        this.gameStarted = false;       // só vai virar true quando o player terminar de carregar
+        this.gameStarted = false; //> Will only turn true when the player finishes loading
         this.clock = new THREE.Clock();
     }
 
@@ -245,28 +245,22 @@ export class Game {
             this.planeSound.stop();
         }
 
-        // Limpa as chamas das turbinas
+        //> Cleans the turbine flames
         this._clearEngineFlames();
 
-        // Desativa sequência de reabastecimento se estiver ativa
-        if (this.isRefuelSequenceActive) {
-            this.refuelPlane.deactivate();
-            this.isRefuelSequenceActive = false;
-        }
-
-        // reset player
+        //> reset player
         this.player.group.position.set(0, -2.5, 0);
         this.player.currentPositionY = -2.5;
-        this.player.group.visible = true; // Garante que o jogador esteja visível
+        this.player.group.visible = true; //> Ensures the player is visible
 
         this.playerLives = this.initialLives;
         this.isInvulnerable = false;
         this.lastHitTime = 0;
 
-        // Reset do sistema de combustível
+        //> Fuel system reset
         this.lastFuelCheck = 0;
 
-        // reset flags e velocidades
+        //> Reset flags and speeds
         Object.assign(this.gameState, {
             speed: 0.02,
             distance: 0,
@@ -280,7 +274,7 @@ export class Game {
     }
 
     _setupScene() {
-        // apenas placeholder, a cena já foi criada no constructor
+        //> Just placeholder, the scene has already been created in the constructor
     }
 
     _initBackground() {
@@ -317,9 +311,9 @@ export class Game {
 
     _initPlayer() {
         this.player = new Player(this.scene, () => {
-            console.log('✅ Player model loaded, game starting!');
+            console.log('Player model loaded, game starting!');
             this.gameStarted = true;
-            // posição inicial do player
+            //> Initial player position
             this.player.group.position.set(0, -2.5, 0);
             this.player.currentPositionY = -2.5;
 
@@ -413,19 +407,19 @@ export class Game {
 
         const deltaTime = this.clock.getDelta();
 
-        // Atualiza animação das chamas
+        //> Update flame animation
         this._updateEngineFlames();
 
-        // pontuação baseada em distância percorrida
+        //> Score based on distance traveled
         this.gameState.distance += this.worldSpeed * deltaTime * 100;
 
-        // Atualiza consumo de combustível baseado na distância
+        //> Updates fuel consumption based on distance
         this._updateFuelConsumption();
 
-        // Atualiza sistema de reabastecimento
+        //> Updates refueling system
         this.tankerManager.update(deltaTime);
 
-        // mover jogador
+        //> Move player
         const dir = this.moveLeft ? 'left'
             : this.moveRight ? 'right'
             : this.moveUp ? 'up'
@@ -437,11 +431,11 @@ export class Game {
         }
         this.player.update(dir, deltaTime, dir!==null, this.increaseSpeed, this.decreaseSpeed);
 
-        // spawn de foguetes
+        //> Rocket spawn
         this.rocketsManager.update();
         this.enemiesManager.update(this.worldSpeed);
 
-        // atualiza UI
+        //> UI update
         updateScoreUI(this.gameState.distance, this.worldSpeed, this.playerLives, this.gameState.fuelLevel);
 
         this.renderer.render(this.scene, this.camera);

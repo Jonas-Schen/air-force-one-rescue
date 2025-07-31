@@ -90,7 +90,7 @@ export class Translator {
     };
 
     constructor() {
-        // Lê o idioma salvo no localStorage ou usa 'en' por padrão
+        //> Reads the language saved in localStorage or uses 'en' by default
         const lang = localStorage.getItem('lang');
         this.defaultLang = 'en';
         this.currentLang = lang || this.defaultLang;

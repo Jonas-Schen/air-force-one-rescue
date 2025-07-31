@@ -10,7 +10,7 @@ export class App {
     }
 
     start() {
-        // 1) Garante que o <div id="gameboard"> esteja oculto até a abertura terminar
+        //> 1) Ensures the <div id="gameboard"> is hidden until the opening is complete
         if (this.gameboard) {
             this.gameboard.style.display = 'none';
         }
@@ -19,19 +19,7 @@ export class App {
             this.openingContainer.style.display = 'block';
         }
 
-        //>Jump opening for tests
-        this.game = new Game();
-        this.game.start();
-        if (this.openingContainer) {
-            this.openingContainer.style.display = 'none';
-        }
-
-        if (this.gameboard) {
-            this.gameboard.style.display = 'block';
-        }
-        return;
-
-        // 2) Cria a Opening, passando como callback a inicialização do GameTakeoff
+        //> 2) Creates the Opening, passing the GameTakeoff initialization as a callback
         this.opening = new Opening(this.openingContainer, () => {
             if (this.openingContainer) {
                 this.openingContainer.style.display = 'none';
@@ -45,7 +33,7 @@ export class App {
             this.game.start();
         });
 
-        // 3) Dispara a abertura
+        //> 3) Trigger the opening
         this.opening.start();
     }
 }

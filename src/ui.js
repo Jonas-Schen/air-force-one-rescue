@@ -51,7 +51,7 @@ function setFuelLevel(level) {
     level = Math.max(0, Math.min(100, level));
     level = level / 100;
     const rect = gauge.getBoundingClientRect();
-    const gaugeHeight = rect.height;  // altura total em pixels
+    const gaugeHeight = rect.height;
     const tickerHeight = ticker.getBoundingClientRect().height;
     const y = (1 - level) * (gaugeHeight - tickerHeight);
     ticker.style.top = `${y}px`;

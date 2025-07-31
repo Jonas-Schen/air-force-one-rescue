@@ -1,4 +1,3 @@
-// rockets.js
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {AudioListener, AudioLoader, Audio} from 'three';
@@ -26,7 +25,7 @@ export class RocketsManager {
         this._initAudios();
         this._loadExplosionTexture();
 
-        // pré-carrega todos os gltf
+        //> Pre loading all the gltf
         rocketDefs.forEach(def =>
             this.loader.load(
                 def.url,
@@ -59,7 +58,7 @@ export class RocketsManager {
     _createExplosionEffect(position) {
         if (!this.explosionTexture) return;
 
-        // Cria material para o sprite de explosão
+        //> Creates material for the explosion sprite
         const spriteMaterial = new THREE.SpriteMaterial({
             map: this.explosionTexture,
             transparent: true,
@@ -67,18 +66,17 @@ export class RocketsManager {
             alphaTest: 0.001
         });
 
-        // Cria o sprite
+        //> Create the sprite
         const explosionSprite = new THREE.Sprite(spriteMaterial);
-        explosionSprite.scale.set(2, 2, 1); // Ajuste o tamanho conforme necessário
+        explosionSprite.scale.set(2, 2, 1);
         explosionSprite.position.copy(position);
 
-        // Adiciona à cena
         this.scene.add(explosionSprite);
 
-        // Remove após 1 segundo com efeito de fade
+        //> Removes after 1 second with fade effect
         let opacity = 1;
         const fadeInterval = setInterval(() => {
-            opacity -= 0.05; // Reduz a opacidade gradualmente
+            opacity -= 0.05; //> Gradually reduces opacity
             spriteMaterial.opacity = opacity;
 
             if (opacity <= 0) {
@@ -86,9 +84,9 @@ export class RocketsManager {
                 spriteMaterial.dispose();
                 clearInterval(fadeInterval);
             }
-        }, 50); // Atualiza a cada 50ms para um fade suave
+        }, 50); //> Updates every 50ms for a smooth fade
 
-        // Garantia de remoção após 1 segundo (caso o fade não funcione)
+        //> Guaranteed to remove after 1 second (if fade doesn't work)
         setTimeout(() => {
             if (explosionSprite.parent) {
                 this.scene.remove(explosionSprite);
@@ -131,7 +129,7 @@ export class RocketsManager {
         );
     }
 
-    // agenda o próximo spawn em 5–10s
+    //> Schedule the next spawn in 5–10s
     _scheduleNext() {
         this._timer = setTimeout(() => {
             this._spawnRocket();
@@ -149,18 +147,18 @@ export class RocketsManager {
         const rocket = model.clone(true);
         rocket.userData = { speed, orientation, spawnOffset: 1 };
 
-        // escala e direção
+        //> Scale and direction
         rocket.scale.set(scale, scale, scale);
         rocket.userData.rotationSpeed = Math.random() * 0.05 + 0.02;
 
-        // limites de visão
+        //> vision limits
         const H = 2 * this.camera.position.z * Math.tan((this.camera.fov/2)*(Math.PI/180));
         const halfH = H/2;
         const viewX = halfH * this.camera.aspect;
         const topY = halfH - 3;
         const botY = -halfH + 1;
 
-        // pos Y aleatória e X fora da tela
+        //> Random Y pos and X off screen
         rocket.position.y = THREE.MathUtils.randFloat(botY, topY);
         const fromLeft = Math.random() < 0.5;
 
@@ -199,11 +197,11 @@ export class RocketsManager {
             r.position.x += dirMul * r.userData.speed;
             r.rotation.z += r.userData.rotationSpeed;
 
-            // checa colisão
+            //> Check collision
             const boxR = new THREE.Box3().setFromObject(r);
             const boxP = new THREE.Box3().setFromObject(this.player.group);
             if (boxR.intersectsBox(boxP)) {
-                // Cria efeito de explosão na posição do míssil
+                //> Creates explosion effect at missile position
                 this._createExplosionEffect(r.position.clone());
 
                 if (this.explosionSound) {
@@ -213,10 +211,11 @@ export class RocketsManager {
                     this.explosionSound.play();
                 }
 
-                // Remove o míssil da cena e do array quando há colisão
+                //> Removes the missile from the scene and array upon collision
                 this.scene.remove(r);
                 this.rockets.splice(i, 1);
-                // Para o som se não há mais mísseis
+
+                //> Stop the sound if there are no more missiles
                 if (this.rocketSound && this.rockets.length === 0) {
                     this.rocketSound.stop();
                 }
@@ -226,7 +225,7 @@ export class RocketsManager {
                 continue;
             }
 
-            // remoção fora da tela
+            //> Off-screen removal
             if (r.position.x > viewX + r.userData.spawnOffset || r.position.x < -viewX - r.userData.spawnOffset) {
                 this.scene.remove(r);
                 this.rockets.splice(i, 1);
@@ -250,7 +249,7 @@ export class RocketsManager {
         }
     }
 
-    // limpa tudo (para reiniciar o jogo)
+    //> Clear everything (to restart the game)
     reset() {
         clearTimeout(this._timer);
         this.rockets.forEach(r => this.scene.remove(r));

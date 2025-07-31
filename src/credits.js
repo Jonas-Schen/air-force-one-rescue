@@ -7,13 +7,13 @@ import { i18n } from './i18n.js';
 
 export class Credits {
     /**
-     * @param {HTMLElement} container  — elemento onde o canvas será inserido (ex: document.body)
+     * @param {HTMLElement} container
      */
     constructor(container) {
         this.container = container;
         this.lines = this._getLines();
 
-        // Configurações padrão
+        //> Default settings
         this.fontSize = 0.5;
         this.color = 0xfcd639;
         this.scrollDuration = 90;
@@ -27,7 +27,7 @@ export class Credits {
             0.1,
             1000
         );
-        // Posiciona a câmera de frente, levemente acima, e inclina-a para “olhar para baixo”
+        //> Position the camera from the front, slightly above, and tilt it to “look down”
         this.camera.position.set(0, 5, 15);
         this.camera.rotation.x = -this.tiltAngle;
 
@@ -36,11 +36,11 @@ export class Credits {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.container.appendChild(this.renderer.domElement);
 
-        // Grupo que conterá todas as linhas de texto
+        //> Group that will contain all lines of text
         this.textGroup = new THREE.Group();
         this.scene.add(this.textGroup);
 
-        // Flags e recursos
+        //> Flags and resources
         this.font = null;
         this.textMeshes = [];
         this._loaded = false;
@@ -55,7 +55,7 @@ export class Credits {
             this._start();
         });
 
-        // Bind para resize
+        //> Bind to resize
         window.addEventListener('resize', this._onResize.bind(this));
     }
 
@@ -65,7 +65,7 @@ export class Credits {
             '/assets/textures/credits.png',
             tex => { this.scene.background = tex; },
             undefined,
-            err => console.error('Erro ao carregar background:', err)
+            err => console.error('Error loading background:', err)
         );
     }
 
@@ -165,9 +165,9 @@ export class Credits {
         const totalHeight = lineCount * this.fontSize + (this.lineSpacing * 2);
         let yCursor = -totalHeight;
 
-        // Vamos percorrer o array de trás para frente:
+        //> Iterates through the array backwards:
         for (let idx = 0; idx < lineCount; idx++) {
-            // pega a linha levando em conta a inversão
+            //> Take the line taking into account the inversion
             const line = this.lines[lineCount - 1 - idx];
             let text = line;
             let fontSize = this.fontSize;
@@ -215,15 +215,15 @@ export class Credits {
         this.container.style.display = 'block';
 
         if (!this._loaded) {
-            console.warn('Fonte ainda não carregada – tente chamar start() após alguns ms.');
+            console.warn('Font not loaded yet – try calling start() after a few ms.');
             return;
         }
-        // Posição final do grupo: todas as linhas devem subir até sair pela parte superior da câmera
-        // Supondo que a câmera “vê” algo como Y ≈ +5 no topo (depende do FOV),
-        // vamos calcular um deslocamento Y suficientemente grande:
+        //> Final position of the group: all lines must rise until they exit through the top of the camera
+        //> Assuming the camera “sees” something like Y ≈ +5 at the top (it depends on FOV),
+        //> Calculate a large enough Y offset:
         let finalOffsetY = (this.lines.length * this.fontSize * this.lineSpacing) * 2;
 
-        // Anima a posição Y do grupo de texto
+        //> Anima a posição Y do grupo de texto
         gsap.fromTo(
             this.textGroup.position,
             { y: 0 },
@@ -232,7 +232,7 @@ export class Credits {
                 duration: this.scrollDuration,
                 ease: 'none',
                 onUpdate: () => {
-                    // A cada frame o texto se move; renderizamos
+                    //> At each frame the text moves; we render
                     this.renderer.render(this.scene, this.camera);
                 },
                 onComplete: () => {
@@ -243,7 +243,7 @@ export class Credits {
     }
 
     _clearScene() {
-        // Remove e dispose dos meshes
+        //> Remove and dispose of meshes
         this.textMeshes.forEach(mesh => {
             mesh.geometry.dispose();
             mesh.material.dispose();
@@ -251,10 +251,10 @@ export class Credits {
         });
         this.textMeshes.length = 0;
 
-        // Remove grupo da cena
+        //> Remove the group from the scene
         this.scene.remove(this.textGroup);
 
-        // Dispose da cena e do renderer
+        //> Dispose of the scene and renderer
         this.renderer.dispose();
         if (this.renderer.domElement.parentNode) {
             this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
@@ -264,7 +264,7 @@ export class Credits {
             this.creditsSound.stop();
         }
 
-        // Oculta o container de créditos
+        //> Hides the credits container
         this.container.style.display = 'none';
 
         const menuOverlay = document.getElementsByClassName('menu-overlay');

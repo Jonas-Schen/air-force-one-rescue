@@ -30,7 +30,6 @@ export class Opening {
     }
 
     _setupScene() {
-        // cena, câmera e renderer
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(
             75,
@@ -54,7 +53,7 @@ export class Opening {
             '/assets/textures/opening.png',
             tex => { this.scene.background = tex; },
             undefined,
-            err => console.error('Erro ao carregar background:', err)
+            err => console.error('Error loading background:', err)
         );
     }
 
@@ -89,7 +88,7 @@ export class Opening {
             metalness: 0.3
         });
 
-        // criar as letras
+        //> create letters
         title.split('').forEach((char, i) => {
             const geo = new TextGeometry(char, {
                 font,
@@ -152,7 +151,7 @@ export class Opening {
     }
 
     start() {
-        // animação de entrada + sequência de explosão e limpeza
+        //> Entrance animation + explosion and cleanup sequence
         gsap.from(this.scales, {
             duration: 1,
             x: 6,
@@ -177,10 +176,10 @@ export class Opening {
                     ease: "power2.out"
                 });
 
-                // explode letras
+                //> Explode letters
                 gsap.delayedCall(2.75, this._explodeLetters.bind(this));
 
-                // limpa cena e finaliza
+                //> Clean scene and finish
                 gsap.delayedCall(5, () => {
                     this._clearScene();
                     this.onFinish();
@@ -238,7 +237,7 @@ export class Opening {
             this.scene.background = null;
         }
 
-        // remove e libera todos os filhos da cena
+        //> Removes and releases all children from the scene
         this.scene.children.slice().forEach(child => {
             this.scene.remove(child);
             this._disposeNode(child);
@@ -269,3 +268,4 @@ export class Opening {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 }
+

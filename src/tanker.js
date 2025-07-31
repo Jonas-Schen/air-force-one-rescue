@@ -29,22 +29,22 @@ export class TankerManager {
         this.approachDuration = 4;
         this.departDuration = 3;
 
-        // Sistema de timeout
+        //> Timeout system
         this.refuelingTimeout = 10;
 
-        // ✅ Sistema de cooldown
+        //> Cooldown system
         this.cooldownDuration = 60;
         this.cooldownElapsedTime = 0;
         this.isInCooldown = false;
 
         this.isPaused = false;
 
-        // Posições E ROTAÇÕES para animação
+        //> Positions and rotations for animations
         this.startPosition = { x: -25, y: 2, z: -5 };
         this.targetPosition = { x: 0, y: -3, z: -3 };
         this.departPosition = { x: 25, y: 2, z: -5 };
 
-        // Rotações para cada fase da animação
+        //> Rotations for each animation phase
         this.startRotation = { x: -2, y: -Math.PI, z: 0 };
         this.targetRotation = { x: 0, y: -Math.PI / 2, z: 0 };
         this.departRotation = { x: 2, y: -Math.PI, z: 0 };
@@ -87,7 +87,7 @@ export class TankerManager {
     }
 
     /**
-     * Carrega o modelo do avião de reabastecimento sob demanda
+     * Loads the on-demand refueling aircraft model
      */
     _loadRefuelingPlane() {
         return new Promise((resolve, reject) => {
@@ -126,7 +126,7 @@ export class TankerManager {
             return;
         }
 
-        const clampedDeltaTime = Math.min(deltaTime, 0.033); // Máximo 33ms (30fps)
+        const clampedDeltaTime = Math.min(deltaTime, 0.033); //> Max 33ms (30fps)
 
         this._updateCooldown(clampedDeltaTime);
 
@@ -143,7 +143,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Atualiza o sistema de cooldown
+     * Update the cooldown system
      */
     _updateCooldown(deltaTime) {
         if (!this.isInCooldown) return;
@@ -161,7 +161,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Inicia o período de cooldown
+     * Start the cooldown period
      */
     _startCooldown() {
         this.isInCooldown = true;
@@ -169,7 +169,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Termina o período de cooldown
+     * Finish the cooldown period
      */
     _endCooldown() {
         this.isInCooldown = false;
@@ -193,7 +193,7 @@ export class TankerManager {
     }
 
     /**
-     * Inicia a aproximação do tanker
+     * Tanker approach begins
      */
     _startTankerApproach() {
         if (!this.tankerPlaneModel || this.isRefuelingActive) return;
@@ -207,7 +207,7 @@ export class TankerManager {
         this.departElapsedTime = 0;
         this.floatElapsedTime = 0;
 
-        // Clona o modelo e configura posição E rotação inicial
+        //> Clones the model and sets the initial position and rotation
         this.tankerPlane = this.tankerPlaneModel.clone();
 
         this.tankerPlane.position.set(
@@ -229,7 +229,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Atualiza o estado e animação do tanker usando deltaTime
+     * Updates tanker state and animation using deltaTime
      */
     _updateTankerState(deltaTime) {
         this.floatElapsedTime += deltaTime;
@@ -251,7 +251,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Anima a aproximação do tanker usando deltaTime
+     * Animates tanker approach using deltaTime
      */
     _updateApproachAnimation(deltaTime) {
         this.approachElapsedTime += deltaTime;
@@ -298,7 +298,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Estado quando o tanker está posicionado esperando o jogador
+     * State when the tanker is positioned waiting for the player
      */
     _updatePositionedState(deltaTime) {
         if (!this.player) return;
@@ -307,7 +307,7 @@ export class TankerManager {
 
         this._addTankerFloatAnimation();
 
-        // Verifica timeout
+        //> Check timeout
         if (this.positionedElapsedTime >= this.refuelingTimeout) {
             this._startTankerDeparture();
 
@@ -341,7 +341,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Estado de reabastecimento ativo
+     * Active refueling status
      */
     _updateRefuelingState(deltaTime) {
         if (!this.player) return;
@@ -376,7 +376,7 @@ export class TankerManager {
     }
 
     /**
-     * Função melhorada para detectar posição de reabastecimento
+     * Improved function to detect refueling position
      */
     _isPlayerInRefuelingPosition(playerPos, refuelingPos) {
         const relativeX = playerPos.x - refuelingPos.x;
@@ -394,7 +394,7 @@ export class TankerManager {
     }
 
     /**
-     * Inicia a saída do tanker (com motivo)
+     * Starts tanker exit
      */
     _startTankerDeparture() {
         if (this.tankerSound) {
@@ -411,7 +411,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Anima a saída do tanker usando deltaTime
+     * Animate tanker output using deltaTime
      */
     _updateDepartAnimation(deltaTime) {
         this.departElapsedTime += deltaTime;
@@ -457,7 +457,7 @@ export class TankerManager {
     }
 
     /**
-     * ✅ Adiciona animação de flutuação ao tanker usando tempo acumulado
+     * Adds floating animation to the tanker using accumulated time
      */
     _addTankerFloatAnimation() {
         if (!this.tankerPlane) return;
@@ -471,14 +471,14 @@ export class TankerManager {
     }
 
     /**
-     * Função de interpolação linear
+     * Linear interpolation function
      */
     _lerp(start, end, progress) {
         return start + (end - start) * progress;
     }
 
     /**
-     * Função de easing para animação suave
+     * Easing function for smooth animation
      */
     _easeInOutCubic(t) {
         return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;

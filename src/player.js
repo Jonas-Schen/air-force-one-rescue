@@ -5,7 +5,7 @@ export class Player {
     constructor(scene, onModelLoaded) {
         this.group = new THREE.Group();
         this.scene = scene;
-        this.elapsedTime = 0; // For idle animation timing
+        this.elapsedTime = 0; //> For idle animation timing
         this.loadModel(onModelLoaded);
         this.currentPositionY = -2.5;
         scene.add(this.group);
@@ -31,7 +31,7 @@ export class Player {
                 model.position.set(0, -2, 0);
                 model.rotation.y = Math.PI;
 
-                this.model = model; // Save reference for animations
+                this.model = model; //> Save reference for animations
                 this.group.add(model);
 
                 if (onModelLoaded) onModelLoaded();
@@ -51,10 +51,10 @@ export class Player {
             case 'down': this.currentPositionY -= speed; break;
         }
 
-        // Limita movimentação horizontal
+        //> Limits horizontal movement
         this.group.position.x = Math.max(Math.min(this.group.position.x, viewLimitX), -viewLimitX);
 
-        // Limita movimentação vertical
+        //> Limits vertical movement
         this.currentPositionY = Math.max(Math.min(this.currentPositionY, upperLimitY), lowerLimitY);
 
         const targetRotationZ = playerDirection === 'left' ? 0.5 : playerDirection === 'right' ? -0.5 : 0;
@@ -64,28 +64,28 @@ export class Player {
     update(playerDirection, deltaTime, isMoving, isAccelerating, isDecelerating) {
         this.elapsedTime += deltaTime;
 
-        // Flutuação suave (idle animation)
+        //> Smooth floating (idle animation)
         const floatAmplitude = 0.2;
         const floatSpeed = 2;
         this.group.position.y = this.currentPositionY + Math.sin(this.elapsedTime * floatSpeed) * floatAmplitude;
 
-        // ✅ Animação de inclinar o bico (Pitch)
+        //> Pitch tilt animation
         let targetRotationX = 0;
 
         if (playerDirection === 'up') {
-            targetRotationX = 0.35;   //> Bico sobe (seta ↑)
+            targetRotationX = 0.35;   //> Nose up (arrow ↑)
         } if (playerDirection === 'down') {
-            targetRotationX = -0.35;  //> Bico desc (seta ↑)
+            targetRotationX = -0.35;  //> Nose down (arrow ↑)
         } else if (isAccelerating) {
-            targetRotationX = -0.15;  //> Bico sobe (tecla a)
+            targetRotationX = -0.15;  //> Nose up (key a)
         } else if (isDecelerating) {
-            targetRotationX = 0.15;   //> Bico desce (tecla z)
+            targetRotationX = 0.15;   //> Nose down (key z)
         }
 
-        // Suavizar a transição de movimento
+        //> Smooth the motion transition
         this.group.rotation.x += (targetRotationX - this.group.rotation.x) * 0.1;
 
-        // ✅ Correção de rotação no eixo Z (lateral)
+        //> Rotation correction on the Z axis (lateral)
         if (!isMoving) {
             this.group.rotation.z += (0 - this.group.rotation.z) * 0.1;
         }
