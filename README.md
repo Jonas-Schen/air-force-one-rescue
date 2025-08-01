@@ -84,6 +84,18 @@ npm run deploy
 
 The built files will be available in the `dist` directory.
 
+## 🤍 Consider Sponsoring
+Help me maintain this project, please consider looking at the [FUNDING](./.github/FUNDING.yml) file for more info.
+
+<a href="https://bmc.link/jonasschen" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
+#### BTC
+![btc](https://github.com/jonasschen/laravel-lang-monitor/assets/31046817/2f69a4aa-4ee2-442e-aa1f-4a1c0cde217c)
+
+#### ETH
+![eth](https://github.com/jonasschen/laravel-lang-monitor/assets/31046817/41ca0d2f-e120-4733-a96b-ff7a34e1e4de)
+
+
 ## 🎯 How to Play
 
 ### Controls
