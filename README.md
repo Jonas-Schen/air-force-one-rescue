@@ -71,12 +71,12 @@ npm install
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173` (or the port shown in your terminal)
+4. Open your browser and navigate to `http://localhost:5173/air-force-one-rescue/` (or the port shown in your terminal)
 
-### Building for Production
+### Building for Deploy
 
 ```
-npm run build
+npm run deploy
 ```
 
 
