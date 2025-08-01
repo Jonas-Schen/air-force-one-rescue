@@ -3,6 +3,8 @@
 A thrilling 3D web-based flight game where you pilot Air Force One through dangerous territory, avoiding enemies and managing fuel while completing rescue missions.
 
 ![Air Force One Rescue](https://img.shields.io/badge/Game-Air%20Force%20One%20Rescue-blue)
+![Views](https://komarev.com/ghpvc/?username=Jonas-Schen&repo=air-force-one-rescue&color=blue)
+![Forks](https://img.shields.io/github/forks/Jonas-Schen/air-force-one-rescue?style=social)
 ![Three.js](https://img.shields.io/badge/Three.js-0.176.0-green)
 ![Vite](https://img.shields.io/badge/Vite-6.3.5-purple)
 ![GSAP](https://img.shields.io/badge/GSAP-3.13.0-orange)
