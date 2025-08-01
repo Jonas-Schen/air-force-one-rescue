@@ -7,7 +7,9 @@ A thrilling 3D web-based flight game where you pilot Air Force One through dange
 ![Vite](https://img.shields.io/badge/Vite-6.3.5-purple)
 ![GSAP](https://img.shields.io/badge/GSAP-3.13.0-orange)
 
-## 🕹️ Try it => https://jonas-schen.github.io/air-force-one-rescue/
+## 🕹️ Try it
+https://jonas-schen.github.io/air-force-one-rescue/
+
 ## 🎯 Game Story
 
 Earth is under siege by alien invaders. Military defenses have collapsed and intercontinental missiles threaten total annihilation. The White House has fallen.
